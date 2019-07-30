@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A command node.
@@ -115,6 +116,24 @@ public class CommandNode<C extends Context> {
    */
   public SuccessParser getHeadParser() {
     return headParser;
+  }
+
+  /**
+   * Returns the usage for this command.
+   *
+   * @return the usage for the command
+   */
+  public String getUsage() {
+    StringBuilder usage = new StringBuilder(headParser.getName());
+
+    if (!children.isEmpty()) {
+      String childUsages = children.stream()
+          .map(CommandNode::getUsage)
+          .collect(Collectors.joining("|", "[", "]"));
+      usage.append(" ").append(childUsages);
+    }
+
+    return usage.toString();
   }
 
   @Override

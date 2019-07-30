@@ -4,6 +4,7 @@ import static de.ialistannen.commandprocrastination.parsing.defaults.StringParse
 import static de.ialistannen.commandprocrastination.parsing.defaults.StringParsers.literal;
 
 import de.ialistannen.commandprocrastination.command.Command;
+import de.ialistannen.commandprocrastination.command.execution.AbnormalCommandResultException;
 import de.ialistannen.commandprocrastination.command.execution.CommandException;
 import de.ialistannen.commandprocrastination.command.execution.CommandExecutor;
 import de.ialistannen.commandprocrastination.command.execution.CommandNotFoundException;
@@ -24,7 +25,10 @@ public class PingCommands {
     CommandNode<PingContext> root = new CommandNode<>(Command.nop(), SuccessParser.alwaysTrue());
 
     CommandNode<PingContext> pingBase = new CommandNode<>(
-        Command.nop(), SuccessParser.wrapping(literal("ping"))
+        context -> {
+          throw AbnormalCommandResultException.showUsage();
+        },
+        SuccessParser.wrapping(literal("ping"))
     );
     CommandNode<PingContext> pingInfo = new CommandNode<>(
         context -> context.getPrinter().accept("Info!"),
@@ -39,9 +43,15 @@ public class PingCommands {
         SuccessParser.wrapping(literal("echo"))
     );
 
+    CommandNode<PingContext> weirdo = new CommandNode<>(
+        context -> context.getPrinter().accept(context.shift(greedyPhrase())),
+        SuccessParser.wrapping(literal("Hello world"))
+    );
+
     pingBase.addChild(pingInfo);
     pingBase.addChild(pingTime);
     pingBase.addChild(pingEcho);
+    pingBase.addChild(weirdo);
 
     root.addChild(pingBase);
 
@@ -76,6 +86,14 @@ public class PingCommands {
         Consumer<String> printer) {
       super(finder, commandArgumentSeparator);
       this.printer = printer;
+    }
+
+    @Override
+    protected void handleAbnormalResult(CommandNode<PingContext> node,
+        AbnormalCommandResultException e) {
+      if (e.getKey() == DefaultDataKey.USAGE) {
+        System.err.println("Usage: " + node.getUsage());
+      }
     }
 
     @Override

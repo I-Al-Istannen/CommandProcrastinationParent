@@ -55,7 +55,7 @@ public class DoubleParsers {
    * @return a parser that reads a double smaller than the given minimum
    */
   public static AtomicParser<Double> decimalWithinRage(double min, double max) {
-    return input -> {
+    AtomicParser<Double> parser = input -> {
       Double parsed = decimal().parse(input);
 
       if (parsed < min) {
@@ -78,5 +78,17 @@ public class DoubleParsers {
       }
       return parsed;
     };
+
+    String name = "Decimal value between " + min + " and " + max;
+    if (min == Double.NEGATIVE_INFINITY) {
+      name = "Decimal value smaller than " + max;
+    } else if (max == Double.POSITIVE_INFINITY) {
+      name = "Decimal value bigger than " + min;
+    }
+    if (min == Double.NEGATIVE_INFINITY && max == Double.NEGATIVE_INFINITY) {
+      name = "Decimal value";
+    }
+
+    return AtomicParser.named(name, parser);
   }
 }

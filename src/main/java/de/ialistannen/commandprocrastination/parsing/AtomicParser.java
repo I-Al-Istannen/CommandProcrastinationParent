@@ -24,4 +24,26 @@ public interface AtomicParser<T> {
   default String getName() {
     return "null";
   }
+
+  /**
+   * Creates a named parser.
+   *
+   * @param name the name
+   * @param parser the parser
+   * @param <T> the type of the parser
+   * @return a named parser
+   */
+  static <T> AtomicParser<T> named(String name, AtomicParser<T> parser) {
+    return new AtomicParser<T>() {
+      @Override
+      public T parse(StringReader input) throws ParseException {
+        return parser.parse(input);
+      }
+
+      @Override
+      public String getName() {
+        return name;
+      }
+    };
+  }
 }

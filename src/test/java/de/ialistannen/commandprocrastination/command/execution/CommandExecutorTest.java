@@ -40,7 +40,7 @@ class CommandExecutorTest {
     );
     CommandNode<Context> abnormalExit = new CommandNode<>(
         it -> {
-          throw new AbnormalCommandResultException(() -> abnormallyExitRunResult = 1);
+          throw new AbnormalCommandResultException("Hello");
         },
         SuccessParser.wrapping(literal("error"))
     );
@@ -96,11 +96,14 @@ class CommandExecutorTest {
   }
 
   @Test
-  public void testAbnormalExitRuns() throws ParseException {
-    executor.execute("error");
+  public void testAbnormalExitRuns() {
+    AbnormalCommandResultException error = assertThrows(
+        AbnormalCommandResultException.class,
+        () -> executor.execute("error")
+    );
     assertEquals(
-        1,
-        abnormallyExitRunResult
+        "Hello",
+        error.getKey()
     );
   }
 

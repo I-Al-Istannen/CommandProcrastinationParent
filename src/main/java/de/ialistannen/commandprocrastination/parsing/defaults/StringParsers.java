@@ -20,12 +20,17 @@ public class StringParsers {
    */
   public static AtomicParser<Void> literal(String expected) {
     int length = expected.length();
-    return input -> {
+    AtomicParser<Void> parser = input -> {
       if (!input.canRead(length) || !expected.equals(input.readChars(length))) {
         throw new ParseException(input, "Expected '" + expected + "'");
       }
       return null;
     };
+
+    return AtomicParser.named(
+        expected,
+        parser
+    );
   }
 
   /**
@@ -36,7 +41,10 @@ public class StringParsers {
   public static AtomicParser<String> word() {
     final Pattern pattern = Pattern.compile("[\\S]*");
 
-    return input -> input.readRegex(pattern);
+    return AtomicParser.named(
+        "A single word",
+        input -> input.readRegex(pattern)
+    );
   }
 
   /**
@@ -45,7 +53,7 @@ public class StringParsers {
    * @return a parser that reads a single word or a quoted phrase
    */
   public static AtomicParser<String> phrase() {
-    return input -> {
+    AtomicParser<String> parser = input -> {
       if (!QUOTE_CHARS.contains(input.peek())) {
         return word().parse(input);
       }
@@ -74,6 +82,7 @@ public class StringParsers {
       }
       return readString.toString();
     };
+    return AtomicParser.named("A (quoted) phrase", parser);
   }
 
   /**
@@ -82,6 +91,9 @@ public class StringParsers {
    * @return a parser that reads the whole left over input
    */
   public static AtomicParser<String> greedyPhrase() {
-    return input -> input.readWhile(it -> true);
+    return AtomicParser.named(
+        "Zero or more characters",
+        input -> input.readWhile(it -> true)
+    );
   }
 }

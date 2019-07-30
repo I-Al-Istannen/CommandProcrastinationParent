@@ -52,7 +52,7 @@ public class IntegerParsers {
    * @return a parser that reads an integer smaller than the given minimum
    */
   public static AtomicParser<Integer> intWithinRage(int min, int max) {
-    return input -> {
+    AtomicParser<Integer> parser = input -> {
       Integer integer = integer().parse(input);
 
       if (integer < min) {
@@ -75,5 +75,17 @@ public class IntegerParsers {
       }
       return integer;
     };
+
+    String name = "Integer between " + min + " and " + max;
+    if (min == Integer.MIN_VALUE) {
+      name = "Integer smaller than " + max;
+    } else if (max == Integer.MAX_VALUE) {
+      name = "Integer bigger than " + min;
+    }
+    if (min == Integer.MIN_VALUE && max == Integer.MAX_VALUE) {
+      name = "Decimal value";
+    }
+
+    return AtomicParser.named(name, parser);
   }
 }

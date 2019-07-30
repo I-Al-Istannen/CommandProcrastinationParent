@@ -32,10 +32,15 @@ public abstract class CommandExecutor<C extends Context> {
   /**
    * Finds and executes a command.
    *
+   * <p><br>Delegates to {@link #execute(StringReader)}.</p>
+   *
    * @param input the input
+   * @throws AbnormalCommandResultException if the command throws one and no handler is
+   *     registered
    * @throws CommandNotFoundException if the command was not found
    * @throws CommandException if there was an error executing the command
    * @throws ParseException if the input format is wrong
+   * @see #execute(StringReader)
    */
   public void execute(String input) throws ParseException {
     execute(new StringReader(input));
@@ -45,6 +50,8 @@ public abstract class CommandExecutor<C extends Context> {
    * Finds and executes a command.
    *
    * @param input the input
+   * @throws AbnormalCommandResultException if the command throws one and no handler is
+   *     registered
    * @throws CommandNotFoundException if the command was not found
    * @throws CommandException if there was an error executing the command
    * @throws ParseException if the input format is wrong
@@ -67,10 +74,34 @@ public abstract class CommandExecutor<C extends Context> {
     CommandNode<C> commandNode = node.get();
 
     try {
-      commandNode.getCommand().execute(createContext(input, commandNode));
+      executeImpl(input, commandNode);
     } catch (AbnormalCommandResultException e) {
-      e.getAction().run();
+      handleAbnormalResult(commandNode, e);
     }
+  }
+
+  /**
+   * Executes the given command using the given context.
+   *
+   * @param input the input
+   * @param commandNode the command node
+   * @throws ParseException if an error occurs
+   * @throws AbnormalCommandResultException if the command throws one
+   * @throws CommandNotFoundException if the command was not found
+   * @throws CommandException if there was an error executing the command
+   */
+  protected void executeImpl(StringReader input, CommandNode<C> commandNode) throws ParseException {
+    commandNode.getCommand().execute(createContext(input, commandNode));
+  }
+
+  /**
+   * Handles an abnormal result exception.
+   *
+   * @param node the source node
+   * @param e the exception
+   */
+  protected void handleAbnormalResult(CommandNode<C> node, AbnormalCommandResultException e) {
+    throw e;
   }
 
   /**
