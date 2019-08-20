@@ -44,9 +44,11 @@ public class CommandNode<C extends Context> {
    * @param key the key
    * @param data the data
    * @param <T> the type of the data
+   * @return this node
    */
-  public <T> void setData(CommandDataKey key, T data) {
+  public <T> CommandNode<C> setData(CommandDataKey key, T data) {
     userData.put(key, data);
+    return this;
   }
 
   /**
