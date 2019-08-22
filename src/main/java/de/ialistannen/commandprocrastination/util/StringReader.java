@@ -103,14 +103,11 @@ public class StringReader {
    */
   public String readWhile(Predicate<Character> predicate) {
     int start = position;
-    while (canRead() && predicate.test(readChar())) {
+    while (canRead() && predicate.test(peek())) {
+      readChar();
     }
 
-    // Don't read the non-matching char
-    position--;
-
-    // return up until that char, but not the char itself
-    return underlying.substring(start, position + 1);
+    return underlying.substring(start, position);
   }
 
   /**

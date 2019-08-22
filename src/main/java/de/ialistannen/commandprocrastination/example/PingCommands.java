@@ -8,6 +8,7 @@ import de.ialistannen.commandprocrastination.command.execution.AbnormalCommandRe
 import de.ialistannen.commandprocrastination.command.execution.CommandException;
 import de.ialistannen.commandprocrastination.command.execution.CommandExecutor;
 import de.ialistannen.commandprocrastination.command.execution.CommandNotFoundException;
+import de.ialistannen.commandprocrastination.command.tree.CommandChain;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
@@ -39,14 +40,20 @@ public class PingCommands {
         SuccessParser.wrapping(literal("time"))
     );
     CommandNode<PingContext> pingEcho = new CommandNode<>(
-        context -> context.getPrinter().accept("Pong: " + context.shift(greedyPhrase())),
+        context -> {
+          String phrase = context.shift(greedyPhrase());
+          context.getPrinter().accept("Pong: " + phrase);
+        },
         SuccessParser.wrapping(literal("echo"))
     );
 
     CommandNode<PingContext> weirdo = new CommandNode<>(
-        context -> context.getPrinter().accept(context.shift(greedyPhrase())),
-        SuccessParser.wrapping(literal("Hello world"))
+        context -> {
+          throw AbnormalCommandResultException.showUsage();
+        },
+        SuccessParser.wrapping(greedyPhrase())
     );
+    weirdo.setData(DefaultDataKey.USAGE, "This is my usage");
 
     pingBase.addChild(pingInfo);
     pingBase.addChild(pingTime);
@@ -89,10 +96,10 @@ public class PingCommands {
     }
 
     @Override
-    protected void handleAbnormalResult(CommandNode<PingContext> node,
+    protected void handleAbnormalResult(CommandChain<PingContext> chain,
         AbnormalCommandResultException e) {
       if (e.getKey() == DefaultDataKey.USAGE) {
-        System.err.println("Usage: " + node.getUsage());
+        System.err.println("Usage: " + chain.buildUsage());
       }
     }
 

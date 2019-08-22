@@ -46,7 +46,7 @@ public class CommandFinder<C extends Context> {
    * @param reader the string reader to use. Will be positioned after the last matching child
    * @return the deepest found command node. Will never be root, but may be descendant of it
    */
-  public Optional<CommandNode<C>> find(StringReader reader) {
+  public Optional<CommandChain<C>> find(StringReader reader) {
     return find(root, reader);
   }
 
@@ -57,7 +57,7 @@ public class CommandFinder<C extends Context> {
    * @param reader the string reader to use. Will be positioned after the last matching child
    * @return the deepest found command node. Will never be root, but may be descendant of it
    */
-  public Optional<CommandNode<C>> find(CommandNode<C> root, StringReader reader) {
+  public Optional<CommandChain<C>> find(CommandNode<C> root, StringReader reader) {
     for (CommandNode<C> child : root.getChildren()) {
       // the success parser resets the position if parsing fails, so we don't need to
       // save it again
@@ -70,22 +70,25 @@ public class CommandFinder<C extends Context> {
       int beforeArgument = reader.getPosition();
       boolean separatorParsed = argumentSeparator.parse(reader);
 
+      CommandChain<C> chain = new CommandChain<>(child);
+
       // Nothing will follow, as there was no proper separator. Treat the rest as arguments and
       // end the descent here
       if (!separatorParsed) {
-        return Optional.of(child);
+        return Optional.of(chain);
       }
 
-      Optional<CommandNode<C>> childResult = find(child, reader);
+      Optional<CommandChain<C>> childResult = find(child, reader);
       if (childResult.isPresent()) {
-        return childResult;
+        chain.append(childResult.get());
+        return Optional.of(chain);
       }
 
       // It was the last command, leave the separator, It is only consumed if it happens to be the
       // same as the command-argument separator
       reader.reset(beforeArgument);
 
-      return Optional.of(child);
+      return Optional.of(chain);
     }
 
     return Optional.empty();

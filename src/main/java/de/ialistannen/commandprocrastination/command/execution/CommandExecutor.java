@@ -1,5 +1,6 @@
 package de.ialistannen.commandprocrastination.command.execution;
 
+import de.ialistannen.commandprocrastination.command.tree.CommandChain;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.context.Context;
@@ -57,9 +58,9 @@ public abstract class CommandExecutor<C extends Context> {
    * @throws ParseException if the input format is wrong
    */
   public void execute(StringReader input) throws ParseException {
-    Optional<CommandNode<C>> node = finder.find(input);
+    Optional<CommandChain<C>> chain = finder.find(input);
 
-    if (node.isEmpty()) {
+    if (chain.isEmpty()) {
       throw new CommandNotFoundException(input.readRemaining());
     }
 
@@ -71,12 +72,12 @@ public abstract class CommandExecutor<C extends Context> {
       );
     }
 
-    CommandNode<C> commandNode = node.get();
+    CommandChain<C> commandChain = chain.get();
 
     try {
-      executeImpl(input, commandNode);
+      executeImpl(input, commandChain.getFinalNode());
     } catch (AbnormalCommandResultException e) {
-      handleAbnormalResult(commandNode, e);
+      handleAbnormalResult(commandChain, e);
     }
   }
 
@@ -97,10 +98,10 @@ public abstract class CommandExecutor<C extends Context> {
   /**
    * Handles an abnormal result exception.
    *
-   * @param node the source node
+   * @param chain the command chain
    * @param e the exception
    */
-  protected void handleAbnormalResult(CommandNode<C> node, AbnormalCommandResultException e) {
+  protected void handleAbnormalResult(CommandChain<C> chain, AbnormalCommandResultException e) {
     throw e;
   }
 
