@@ -19,10 +19,10 @@ public interface AtomicParser<T> {
   /**
    * Returns the name of the parser.
    *
-   * @return the name of the parser
+   * @return the name of the parser or null if none
    */
   default String getName() {
-    return "null";
+    return null;
   }
 
   /**

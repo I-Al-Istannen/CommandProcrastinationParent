@@ -126,7 +126,9 @@ public class CommandNode<C extends Context> {
    * @return the usage for the command
    */
   public String getUsage() {
-    StringBuilder usage = new StringBuilder(headParser.getName());
+    StringBuilder usage = new StringBuilder(
+        headParser.getName() == null ? "" : headParser.getName()
+    );
 
     if (!children.isEmpty()) {
       String childUsages = children.stream()

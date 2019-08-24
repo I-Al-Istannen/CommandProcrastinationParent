@@ -5,7 +5,6 @@ import static de.ialistannen.commandprocrastination.parsing.defaults.StringParse
 import de.ialistannen.commandprocrastination.context.Context;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
-import java.util.Optional;
 
 /**
  * A command finder.
@@ -46,7 +45,7 @@ public class CommandFinder<C extends Context> {
    * @param reader the string reader to use. Will be positioned after the last matching child
    * @return the deepest found command node. Will never be root, but may be descendant of it
    */
-  public Optional<CommandChain<C>> find(StringReader reader) {
+  public FindResult<C> find(StringReader reader) {
     return find(root, reader);
   }
 
@@ -57,7 +56,7 @@ public class CommandFinder<C extends Context> {
    * @param reader the string reader to use. Will be positioned after the last matching child
    * @return the deepest found command node. Will never be root, but may be descendant of it
    */
-  public Optional<CommandChain<C>> find(CommandNode<C> root, StringReader reader) {
+  public FindResult<C> find(CommandNode<C> root, StringReader reader) {
     for (CommandNode<C> child : root.getChildren()) {
       // the success parser resets the position if parsing fails, so we don't need to
       // save it again
@@ -75,22 +74,41 @@ public class CommandFinder<C extends Context> {
       // Nothing will follow, as there was no proper separator. Treat the rest as arguments and
       // end the descent here
       if (!separatorParsed) {
-        return Optional.of(chain);
+        return new FindResult<>(chain, true);
       }
 
-      Optional<CommandChain<C>> childResult = find(child, reader);
-      if (childResult.isPresent()) {
-        chain.append(childResult.get());
-        return Optional.of(chain);
+      FindResult<C> childResult = find(child, reader);
+      if (childResult.isSuccess()) {
+        chain.append(childResult.getChain());
+        return new FindResult<>(chain, true);
       }
 
       // It was the last command, leave the separator, It is only consumed if it happens to be the
       // same as the command-argument separator
       reader.reset(beforeArgument);
 
-      return Optional.of(chain);
+      return new FindResult<>(chain, true);
     }
 
-    return Optional.empty();
+    return new FindResult<C>(new CommandChain<>(root), false);
+  }
+
+  public static class FindResult<C extends Context> {
+
+    private CommandChain<C> chain;
+    private boolean success;
+
+    public FindResult(CommandChain<C> chain, boolean success) {
+      this.chain = chain;
+      this.success = success;
+    }
+
+    public CommandChain<C> getChain() {
+      return chain;
+    }
+
+    public boolean isSuccess() {
+      return success;
+    }
   }
 }

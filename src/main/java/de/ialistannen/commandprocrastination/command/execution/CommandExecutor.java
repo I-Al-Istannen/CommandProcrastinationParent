@@ -2,12 +2,12 @@ package de.ialistannen.commandprocrastination.command.execution;
 
 import de.ialistannen.commandprocrastination.command.tree.CommandChain;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
+import de.ialistannen.commandprocrastination.command.tree.CommandFinder.FindResult;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.context.Context;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
-import java.util.Optional;
 
 /**
  * A command executor.
@@ -58,10 +58,10 @@ public abstract class CommandExecutor<C extends Context> {
    * @throws ParseException if the input format is wrong
    */
   public void execute(StringReader input) throws ParseException {
-    Optional<CommandChain<C>> chain = finder.find(input);
+    FindResult<C> findResult = finder.find(input);
 
-    if (chain.isEmpty()) {
-      throw new CommandNotFoundException(input.readRemaining());
+    if (!findResult.isSuccess()) {
+      throw new CommandNotFoundException(input.readRemaining(), findResult);
     }
 
     boolean parsedSeparator = commandArgumentSeparator.parse(input);
@@ -72,7 +72,7 @@ public abstract class CommandExecutor<C extends Context> {
       );
     }
 
-    CommandChain<C> commandChain = chain.get();
+    CommandChain<C> commandChain = findResult.getChain();
 
     try {
       executeImpl(input, commandChain.getFinalNode());
