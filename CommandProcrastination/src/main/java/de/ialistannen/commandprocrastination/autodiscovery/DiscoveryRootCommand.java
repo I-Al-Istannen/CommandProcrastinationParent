@@ -45,18 +45,14 @@ public class DiscoveryRootCommand<C extends Context> extends CommandNode<C> {
             .findFirst()
         );
 
+    allCommands.add(node);
+
     if (parentNode.isPresent()) {
       parentNode.get().addChild(node);
       return true;
     }
     addChild(node);
     return false;
-  }
-
-  @Override
-  public void addChild(CommandNode<C> child) {
-    super.addChild(child);
-    allCommands.add(child);
   }
 
   private boolean hasName(CommandNode<C> node, String name) {
