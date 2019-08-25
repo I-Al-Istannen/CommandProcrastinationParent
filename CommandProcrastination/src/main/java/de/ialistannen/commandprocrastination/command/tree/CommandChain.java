@@ -4,7 +4,10 @@ import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * A chain of commands that leads to the final selected one.
@@ -115,33 +118,14 @@ public class CommandChain<C extends Context> {
     return end.getValue();
   }
 
+  @AllArgsConstructor
+  @EqualsAndHashCode
+  @ToString
+  @Getter
   private static class ChainLink<E> {
 
     private ChainLink<E> next;
-    private E value;
-
-    ChainLink(ChainLink<E> next, E value) {
-      this.next = next;
-      this.value = value;
-    }
-
-    /**
-     * Returns the node.
-     *
-     * @return the node
-     */
-    E getValue() {
-      return value;
-    }
-
-    /**
-     * Returns the child chain or null.
-     *
-     * @return the child cian or null
-     */
-    ChainLink<E> getNext() {
-      return next;
-    }
+    private final E value;
 
     /**
      * Returns whether this chain link is the last one.
@@ -150,24 +134,6 @@ public class CommandChain<C extends Context> {
      */
     boolean isEnd() {
       return getNext() == null;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      ChainLink<?> chainLink = (ChainLink<?>) o;
-      return Objects.equals(next, chainLink.next) &&
-          Objects.equals(value, chainLink.value);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(next, value);
     }
   }
 }

@@ -11,8 +11,8 @@ import java.util.List;
  */
 public class Context {
 
-  private StringReader reader;
-  private CommandNode<?> finalNode;
+  private final StringReader reader;
+  private final CommandNode<?> finalNode;
 
   /**
    * Creates a new context with the given reader.

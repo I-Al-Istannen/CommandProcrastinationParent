@@ -5,6 +5,7 @@ import static de.ialistannen.commandprocrastination.parsing.defaults.StringParse
 import de.ialistannen.commandprocrastination.context.Context;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
+import lombok.Data;
 
 /**
  * A command finder.
@@ -93,22 +94,15 @@ public class CommandFinder<C extends Context> {
     return new FindResult<C>(new CommandChain<>(root), false);
   }
 
+  /**
+   * The result of searching for a command.
+   *
+   * @param <C> the type of the context
+   */
+  @Data
   public static class FindResult<C extends Context> {
 
-    private CommandChain<C> chain;
-    private boolean success;
-
-    public FindResult(CommandChain<C> chain, boolean success) {
-      this.chain = chain;
-      this.success = success;
-    }
-
-    public CommandChain<C> getChain() {
-      return chain;
-    }
-
-    public boolean isSuccess() {
-      return success;
-    }
+    private final CommandChain<C> chain;
+    private final boolean success;
   }
 }

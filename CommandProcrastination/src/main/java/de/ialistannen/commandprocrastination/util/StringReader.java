@@ -4,13 +4,15 @@ package de.ialistannen.commandprocrastination.util;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.ToString;
 
 /**
  * A utility reader for a string.
  */
+@ToString
 public class StringReader {
 
-  private String underlying;
+  private final String underlying;
   private int position;
 
   /**

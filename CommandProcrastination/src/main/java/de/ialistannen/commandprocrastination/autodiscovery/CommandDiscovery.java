@@ -83,6 +83,17 @@ public class CommandDiscovery {
         .findFirst();
   }
 
+  /**
+   * Topologically sorts the input graph nodes.
+   *
+   * <br><a href="https://en.wikipedia.org/wiki/Topological_ordering#Depth-first_search">Algorithm
+   * used.</a>
+   *
+   * @param nodes the nodes
+   * @param <E> the type of the graph value
+   * @return the sorted list
+   * @throws CycleException if a cycle is detected
+   */
   private <E extends CommandNode<?>> List<GraphNode<E>> topologicalSort(List<GraphNode<E>> nodes) {
     List<GraphNode<E>> result = new ArrayList<>();
 
