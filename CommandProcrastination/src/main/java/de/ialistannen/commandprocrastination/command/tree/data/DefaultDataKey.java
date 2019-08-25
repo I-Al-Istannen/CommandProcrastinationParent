@@ -19,5 +19,9 @@ public enum DefaultDataKey implements CommandDataKey {
   /**
    * The permission required for the command. A String
    */
-  PERMISSION
+  PERMISSION,
+  /**
+   * The identifier for the node. E.g. used by auto discovery.
+   */
+  IDENTIFIER;
 }

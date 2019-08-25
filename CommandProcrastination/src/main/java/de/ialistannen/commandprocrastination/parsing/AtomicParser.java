@@ -1,6 +1,7 @@
 package de.ialistannen.commandprocrastination.parsing;
 
 import de.ialistannen.commandprocrastination.util.StringReader;
+import java.util.Optional;
 
 /**
  * Parses a single structure.
@@ -19,10 +20,10 @@ public interface AtomicParser<T> {
   /**
    * Returns the name of the parser.
    *
-   * @return the name of the parser or null if none
+   * @return the name of the parser or empty if none
    */
-  default String getName() {
-    return null;
+  default Optional<String> getName() {
+    return Optional.empty();
   }
 
   /**
@@ -41,8 +42,8 @@ public interface AtomicParser<T> {
       }
 
       @Override
-      public String getName() {
-        return name;
+      public Optional<String> getName() {
+        return Optional.ofNullable(name);
       }
     };
   }

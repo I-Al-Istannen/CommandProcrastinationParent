@@ -1,5 +1,6 @@
 package de.ialistannen.commandprocrastination.command.tree;
 
+import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +77,11 @@ public class CommandChain<C extends Context> {
       if (currentLink.isEnd()) {
         usageParts.add(currentLink.getValue().getUsage());
       } else {
-        if (currentLink.getValue().getHeadParser().getName() != null) {
-          usageParts.add(currentLink.getValue().getHeadParser().getName());
-        }
+        var finalLink = currentLink;
+
+        currentLink.getValue().<String>getOptionalData(DefaultDataKey.IDENTIFIER)
+            .or(() -> finalLink.getValue().getHeadParser().getName())
+            .ifPresent(usageParts::add);
       }
       currentLink = currentLink.getNext();
     }

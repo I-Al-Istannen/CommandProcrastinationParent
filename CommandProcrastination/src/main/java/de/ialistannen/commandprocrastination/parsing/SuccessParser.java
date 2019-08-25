@@ -1,6 +1,7 @@
 package de.ialistannen.commandprocrastination.parsing;
 
 import de.ialistannen.commandprocrastination.util.StringReader;
+import java.util.Optional;
 
 /**
  * A parser that wraps around another and returns true if the underlying parser is successful.
@@ -29,7 +30,7 @@ public class SuccessParser implements AtomicParser<Boolean> {
   }
 
   @Override
-  public String getName() {
+  public Optional<String> getName() {
     return underlying.getName();
   }
 
