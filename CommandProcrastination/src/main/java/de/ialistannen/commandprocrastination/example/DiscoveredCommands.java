@@ -16,13 +16,12 @@ import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
-import de.ialistannen.generated_commands.CommandClasses;
 import java.util.Scanner;
 
 public class DiscoveredCommands {
 
   public static void main(String[] args) {
-    CommandNode<Context> root = new CommandDiscovery(new CommandClasses()).findCommands();
+    CommandNode<Context> root = new CommandDiscovery().findCommands();
 
     CommandFinder<Context> finder = new CommandFinder<>(root);
     CommandExecutor<Context, RequestContext> executor = new SimpleExecutor(

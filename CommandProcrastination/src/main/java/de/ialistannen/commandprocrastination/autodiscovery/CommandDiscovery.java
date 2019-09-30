@@ -1,9 +1,11 @@
 package de.ialistannen.commandprocrastination.autodiscovery;
 
-import de.ialistannen.commandprocrastination.autodiscovery.processor.CollectedCommands;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +19,6 @@ import lombok.Setter;
  * Discovers commands on the classpath.
  */
 public class CommandDiscovery {
-
-  private final CollectedCommands collectedCommands;
-
-  public CommandDiscovery(CollectedCommands collectedCommands) {
-    this.collectedCommands = collectedCommands;
-  }
 
   /**
    * Finds all commands, instantiates them, tries to order them and returns the root.
@@ -51,7 +47,15 @@ public class CommandDiscovery {
   private <C extends Context> List<GraphNode<CommandNode<C>>> findAllCommands() {
     List<GraphNode<CommandNode<C>>> nodes = new ArrayList<>();
 
-    Class[] classes = collectedCommands.getCollectedCommands();
+    ScanResult classGraph = new ClassGraph()
+        .enableClassInfo()
+        .enableAnnotationInfo()
+        .scan();
+    List<Class<?>> classes = classGraph.getAllStandardClasses().stream()
+        .filter(it -> it.hasAnnotation(ActiveCommand.class.getCanonicalName()))
+        .map(ClassInfo::loadClass)
+        .collect(Collectors.toList());
+
     for (Class<?> aClass : classes) {
       if (!aClass.isAnnotationPresent(ActiveCommand.class)) {
         continue;
