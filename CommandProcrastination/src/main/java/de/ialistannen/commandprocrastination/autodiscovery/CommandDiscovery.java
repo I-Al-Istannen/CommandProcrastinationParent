@@ -6,6 +6,7 @@ import de.ialistannen.commandprocrastination.context.Context;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +24,13 @@ public class CommandDiscovery {
   /**
    * Finds all commands, instantiates them, tries to order them and returns the root.
    *
+   * @param initialContext the initial context to pass to discovered commands
    * @param <C> the type of the context
    * @return the found commands
    */
-  public <C extends Context> CommandNode<C> findCommands() {
+  public <C extends Context> CommandNode<C> findCommands(C initialContext) {
     DiscoveryRootCommand<C> root = new DiscoveryRootCommand<>();
-    List<GraphNode<CommandNode<C>>> nodes = findAllCommands();
+    List<GraphNode<CommandNode<C>>> nodes = findAllCommands(initialContext);
 
     // Connect the graph
     for (GraphNode<CommandNode<C>> node : nodes) {
@@ -44,7 +46,7 @@ public class CommandDiscovery {
     return root;
   }
 
-  private <C extends Context> List<GraphNode<CommandNode<C>>> findAllCommands() {
+  private <C extends Context> List<GraphNode<CommandNode<C>>> findAllCommands(C initialContext) {
     List<GraphNode<CommandNode<C>>> nodes = new ArrayList<>();
 
     ScanResult classGraph = new ClassGraph()
@@ -64,9 +66,7 @@ public class CommandDiscovery {
 
       CommandNode<C> node;
       try {
-        @SuppressWarnings("unchecked")
-        CommandNode<C> temp = (CommandNode<C>) aClass.getConstructor().newInstance();
-        node = temp;
+        node = instantiate(initialContext, aClass);
       } catch (ReflectiveOperationException e) {
         throw new RuntimeException(e);
       }
@@ -82,6 +82,22 @@ public class CommandDiscovery {
     }
 
     return nodes;
+  }
+
+  private <C extends Context> CommandNode<C> instantiate(C initialContext, Class<?> clazz)
+      throws ReflectiveOperationException {
+    for (Constructor<?> constructor : clazz.getConstructors()) {
+      if (constructor.getParameterCount() == 1) {
+        if (Context.class.isAssignableFrom(constructor.getParameterTypes()[0])) {
+          @SuppressWarnings("unchecked")
+          CommandNode<C> temp = (CommandNode<C>) constructor.newInstance(initialContext);
+          return temp;
+        }
+      }
+    }
+    @SuppressWarnings("unchecked")
+    CommandNode<C> temp = (CommandNode<C>) clazz.getConstructor().newInstance();
+    return temp;
   }
 
   private <E> Optional<GraphNode<E>> findNode(NodeRelation relation, List<GraphNode<E>> nodes) {

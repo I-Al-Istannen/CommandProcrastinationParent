@@ -21,7 +21,7 @@ import java.util.Scanner;
 public class DiscoveredCommands {
 
   public static void main(String[] args) {
-    CommandNode<Context> root = new CommandDiscovery().findCommands();
+    CommandNode<Context> root = new CommandDiscovery().findCommands(new Context(null, null));
 
     CommandFinder<Context> finder = new CommandFinder<>(root);
     CommandExecutor<Context, RequestContext> executor = new SimpleExecutor(
