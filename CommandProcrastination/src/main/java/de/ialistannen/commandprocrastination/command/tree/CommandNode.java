@@ -76,6 +76,16 @@ public class CommandNode<C extends Context> {
   }
 
   /**
+   * Returns whether user data is prsent.
+   *
+   * @param key the key to look up
+   * @return true if the value is present
+   */
+  public boolean hasOptionalData(CommandDataKey key) {
+    return getOptionalData(key).isPresent();
+  }
+
+  /**
    * Adds a child.
    *
    * @param child the child to add

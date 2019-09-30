@@ -9,7 +9,6 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>de.ialistannen</groupId>
   <artifactId>CommandProcrastination</artifactId>
 
   <properties>
@@ -24,6 +23,11 @@
         <version>3.8.0</version>
         <configuration>
           <release>11</release>
+
+          <compilerArgs>
+            <arg>-AtargetPackage=de.ialistannen.generated_commands</arg>
+          </compilerArgs>
+
           <annotationProcessors>
             <annotationProcessor>
               de.ialistannen.commandprocrastination.autodiscovery.processor.CommandCollectingAnnotationProcessor
@@ -51,6 +55,21 @@
         <configuration>
           <finalName>${project.name}</finalName>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

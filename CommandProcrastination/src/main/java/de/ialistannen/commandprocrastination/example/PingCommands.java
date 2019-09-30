@@ -13,6 +13,7 @@ import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
@@ -74,7 +75,7 @@ public class PingCommands {
     while (!"exit".equals(read)) {
       read = scanner.nextLine();
       try {
-        pingExecutor.execute(read);
+        pingExecutor.execute(read, null);
       } catch (ParseException e) {
         System.err.println("Syntax error: " + e.getMessage());
       } catch (CommandNotFoundException e) {
@@ -85,7 +86,7 @@ public class PingCommands {
     }
   }
 
-  private static class PingExecutor extends CommandExecutor<PingContext> {
+  private static class PingExecutor extends CommandExecutor<PingContext, RequestContext> {
 
     private Consumer<String> printer;
 
@@ -104,7 +105,8 @@ public class PingCommands {
     }
 
     @Override
-    protected PingContext createContext(StringReader input, CommandNode<PingContext> node) {
+    protected PingContext createContext(StringReader input, CommandNode<PingContext> node,
+        RequestContext requestContext) {
       return new PingContext(input, node, printer);
     }
   }

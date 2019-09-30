@@ -2,6 +2,7 @@ package de.ialistannen.commandprocrastination.command.tree;
 
 import static de.ialistannen.commandprocrastination.parsing.defaults.StringParsers.literal;
 
+import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
@@ -74,7 +75,7 @@ public class CommandFinder<C extends Context> {
 
       // Nothing will follow, as there was no proper separator. Treat the rest as arguments and
       // end the descent here
-      if (!separatorParsed) {
+      if (!separatorParsed && !child.hasOptionalData(DefaultDataKey.NO_ARGUMENT_SEPARATOR)) {
         return new FindResult<>(chain, true);
       }
 

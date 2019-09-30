@@ -23,5 +23,10 @@ public enum DefaultDataKey implements CommandDataKey {
   /**
    * The identifier for the node. E.g. used by auto discovery.
    */
-  IDENTIFIER;
+  IDENTIFIER,
+  /**
+   * Indicates that no argument separator is needed behind this command. Parsing continues and does
+   * not automatically stop, just because no separator was found.
+   */
+  NO_ARGUMENT_SEPARATOR;
 }

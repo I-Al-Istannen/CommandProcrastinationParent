@@ -25,6 +25,7 @@ public class DiscoveryRootCommand<C extends Context> extends CommandNode<C> {
     super(Command.nop(), SuccessParser.alwaysTrue());
 
     allCommands = new ArrayList<>();
+    setData(DefaultDataKey.NO_ARGUMENT_SEPARATOR, true);
   }
 
   /**

@@ -29,12 +29,20 @@ import org.kohsuke.MetaInfServices;
 public class CommandCollectingAnnotationProcessor extends AbstractProcessor {
 
   private List<String> foundElements;
+  private String packageName;
 
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
-    System.out.println("INIT!");
     foundElements = new ArrayList<>();
+
+    packageName = processingEnv.getOptions().get("targetPackage");
+    if (packageName == null || packageName.isBlank()) {
+      processingEnv.getMessager().printMessage(
+          Kind.ERROR, "No 'targetPackage' option given!"
+      );
+    }
+    packageName = packageName.trim();
   }
 
   @Override
@@ -55,11 +63,15 @@ public class CommandCollectingAnnotationProcessor extends AbstractProcessor {
           .map(it -> "      " + it + ".class,")
           .collect(Collectors.joining("\n"));
 
-      String collectedClass = "package de.ialistannen.generated_commands;\n"
-          + "public class CommandClasses {\n"
+      String collectedClass = "package " + packageName + ";\n"
+          + "import de.ialistannen.commandprocrastination.autodiscovery.processor.CollectedCommands;\n"
+          + "public class CommandClasses implements CollectedCommands {\n"
           + "  public static final Class[] COMMAND_CLASSES = new Class[]{\n"
           + classNames
           + "  };\n"
+          + "public Class<?>[] getCollectedCommands() {\n"
+          + "    return COMMAND_CLASSES;\n"
+          + "  }"
           + "}";
 
       saveClass(collectedClass);
@@ -71,7 +83,9 @@ public class CommandCollectingAnnotationProcessor extends AbstractProcessor {
 
   private void saveClass(String collectedClass) {
     try {
-      JavaFileObject commandClasses = processingEnv.getFiler().createSourceFile("CommandClasses");
+      JavaFileObject commandClasses = processingEnv.getFiler().createSourceFile(
+          packageName + ".CommandClasses"
+      );
 
       try (Writer writer = commandClasses.openWriter()) {
         writer.write(collectedClass);
@@ -97,13 +111,11 @@ public class CommandCollectingAnnotationProcessor extends AbstractProcessor {
         .map(it -> (ExecutableElement) it)
         .filter(it -> it.getParameters().size() != 0)
         .findFirst()
-        .ifPresent(constructor -> {
-          processingEnv.getMessager().printMessage(
-              Kind.ERROR,
-              "You need a no-args constructor",
-              type
-          );
-        });
+        .ifPresent(constructor -> processingEnv.getMessager().printMessage(
+            Kind.ERROR,
+            "You need a no-args constructor",
+            type
+        ));
     foundElements.add(type.getQualifiedName().toString());
   }
 }

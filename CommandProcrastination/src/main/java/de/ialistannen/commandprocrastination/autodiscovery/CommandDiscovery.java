@@ -1,9 +1,9 @@
 package de.ialistannen.commandprocrastination.autodiscovery;
 
+import de.ialistannen.commandprocrastination.autodiscovery.processor.CollectedCommands;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
-import de.ialistannen.generated_commands.CommandClasses;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +17,12 @@ import lombok.Setter;
  * Discovers commands on the classpath.
  */
 public class CommandDiscovery {
+
+  private final CollectedCommands collectedCommands;
+
+  public CommandDiscovery(CollectedCommands collectedCommands) {
+    this.collectedCommands = collectedCommands;
+  }
 
   /**
    * Finds all commands, instantiates them, tries to order them and returns the root.
@@ -45,7 +51,7 @@ public class CommandDiscovery {
   private <C extends Context> List<GraphNode<CommandNode<C>>> findAllCommands() {
     List<GraphNode<CommandNode<C>>> nodes = new ArrayList<>();
 
-    Class[] classes = CommandClasses.COMMAND_CLASSES;
+    Class[] classes = collectedCommands.getCollectedCommands();
     for (Class<?> aClass : classes) {
       if (!aClass.isAnnotationPresent(ActiveCommand.class)) {
         continue;

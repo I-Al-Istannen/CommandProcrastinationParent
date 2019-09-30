@@ -10,6 +10,7 @@ import de.ialistannen.commandprocrastination.command.Command;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class CommandExecutorTest {
 
-  private CommandExecutor<Context> executor;
+  private CommandExecutor<Context, RequestContext> executor;
 
   private String fooResult;
   private String fooBarResult;
@@ -69,7 +70,7 @@ class CommandExecutorTest {
 
   @Test
   public void testFooSetsArgument() throws ParseException {
-    executor.execute("foo Is this");
+    executor.execute("foo Is this", null);
     assertEquals(
         "Is this",
         fooResult
@@ -79,7 +80,7 @@ class CommandExecutorTest {
   @Test
   public void testIntegerSetsArgument() throws ParseException {
     // 2000 is the node, 20 the argument
-    executor.execute("2000 20");
+    executor.execute("2000 20", null);
     assertEquals(
         20,
         integerResult
@@ -88,7 +89,7 @@ class CommandExecutorTest {
 
   @Test
   public void testNestedSetsArgument() throws ParseException {
-    executor.execute("foo bar is this");
+    executor.execute("foo bar is this", null);
     assertEquals(
         "is this",
         fooBarResult
@@ -99,7 +100,7 @@ class CommandExecutorTest {
   public void testAbnormalExitRuns() {
     AbnormalCommandResultException error = assertThrows(
         AbnormalCommandResultException.class,
-        () -> executor.execute("error")
+        () -> executor.execute("error", null)
     );
     assertEquals(
         "Hello",
@@ -111,7 +112,7 @@ class CommandExecutorTest {
   public void testCommandExceptionIsPropagated() {
     CommandException exception = assertThrows(
         CommandException.class,
-        () -> executor.execute("command_exception")
+        () -> executor.execute("command_exception", null)
     );
     assertEquals(
         "Test",
@@ -123,7 +124,7 @@ class CommandExecutorTest {
   public void testParseExceptionIsPropagated() {
     ParseException exception = assertThrows(
         ParseException.class,
-        () -> executor.execute("parse_exception")
+        () -> executor.execute("parse_exception", null)
     );
     assertEquals(
         "Expected 'Hello' at _exception<---[HERE]",
@@ -135,7 +136,7 @@ class CommandExecutorTest {
   public void testCommandNotFoundException() {
     CommandNotFoundException exception = assertThrows(
         CommandNotFoundException.class,
-        () -> executor.execute("whatever is not registered")
+        () -> executor.execute("whatever is not registered", null)
     );
     assertEquals(
         "Command for 'whatever is not registered' not found!",
@@ -143,14 +144,15 @@ class CommandExecutorTest {
     );
   }
 
-  private static class SimpleExecutor extends CommandExecutor<Context> {
+  private static class SimpleExecutor extends CommandExecutor<Context, RequestContext> {
 
     SimpleExecutor(CommandFinder<Context> finder, SuccessParser commandArgumentSeparator) {
       super(finder, commandArgumentSeparator);
     }
 
     @Override
-    protected Context createContext(StringReader input, CommandNode<Context> node) {
+    protected Context createContext(StringReader input, CommandNode<Context> node,
+        RequestContext r) {
       return new Context(input, node);
     }
   }

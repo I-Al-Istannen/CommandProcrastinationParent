@@ -5,6 +5,7 @@ import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder.FindResult;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
@@ -14,7 +15,7 @@ import de.ialistannen.commandprocrastination.util.StringReader;
  *
  * @param <C> the context type
  */
-public abstract class CommandExecutor<C extends Context> {
+public abstract class CommandExecutor<C extends Context, R extends RequestContext> {
 
   private CommandFinder<C> finder;
   private SuccessParser commandArgumentSeparator;
@@ -33,7 +34,7 @@ public abstract class CommandExecutor<C extends Context> {
   /**
    * Finds and executes a command.
    *
-   * <p><br>Delegates to {@link #execute(StringReader)}.</p>
+   * <p><br>Delegates to {@link #execute(StringReader, RequestContext)}.</p>
    *
    * @param input the input
    * @throws AbnormalCommandResultException if the command throws one and no handler is
@@ -41,10 +42,10 @@ public abstract class CommandExecutor<C extends Context> {
    * @throws CommandNotFoundException if the command was not found
    * @throws CommandException if there was an error executing the command
    * @throws ParseException if the input format is wrong
-   * @see #execute(StringReader)
+   * @see #execute(StringReader, RequestContext)
    */
-  public void execute(String input) throws ParseException {
-    execute(new StringReader(input));
+  public void execute(String input, R requestContext) throws ParseException {
+    execute(new StringReader(input), requestContext);
   }
 
   /**
@@ -57,7 +58,7 @@ public abstract class CommandExecutor<C extends Context> {
    * @throws CommandException if there was an error executing the command
    * @throws ParseException if the input format is wrong
    */
-  public void execute(StringReader input) throws ParseException {
+  public void execute(StringReader input, R requestContext) throws ParseException {
     FindResult<C> findResult = finder.find(input);
 
     if (!findResult.isSuccess()) {
@@ -75,7 +76,7 @@ public abstract class CommandExecutor<C extends Context> {
     CommandChain<C> commandChain = findResult.getChain();
 
     try {
-      executeImpl(input, commandChain.getFinalNode());
+      executeImpl(input, commandChain.getFinalNode(), requestContext);
     } catch (AbnormalCommandResultException e) {
       handleAbnormalResult(commandChain, e);
     }
@@ -86,13 +87,15 @@ public abstract class CommandExecutor<C extends Context> {
    *
    * @param input the input
    * @param commandNode the command node
+   * @param requestContext the request context
    * @throws ParseException if an error occurs
    * @throws AbnormalCommandResultException if the command throws one
    * @throws CommandNotFoundException if the command was not found
    * @throws CommandException if there was an error executing the command
    */
-  protected void executeImpl(StringReader input, CommandNode<C> commandNode) throws ParseException {
-    commandNode.getCommand().execute(createContext(input, commandNode));
+  protected void executeImpl(StringReader input, CommandNode<C> commandNode, R requestContext)
+      throws ParseException {
+    commandNode.getCommand().execute(createContext(input, commandNode, requestContext));
   }
 
   /**
@@ -110,7 +113,8 @@ public abstract class CommandExecutor<C extends Context> {
    *
    * @param input the input
    * @param node the command node
+   * @param requestContext the request context
    * @return a fitting context
    */
-  protected abstract C createContext(StringReader input, CommandNode<C> node);
+  protected abstract C createContext(StringReader input, CommandNode<C> node, R requestContext);
 }

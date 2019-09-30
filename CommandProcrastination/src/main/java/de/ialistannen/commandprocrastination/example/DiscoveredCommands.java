@@ -12,18 +12,20 @@ import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
 import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
+import de.ialistannen.generated_commands.CommandClasses;
 import java.util.Scanner;
 
 public class DiscoveredCommands {
 
   public static void main(String[] args) {
-    CommandNode<Context> root = new CommandDiscovery().findCommands();
+    CommandNode<Context> root = new CommandDiscovery(new CommandClasses()).findCommands();
 
     CommandFinder<Context> finder = new CommandFinder<>(root);
-    CommandExecutor<Context> executor = new SimpleExecutor(
+    CommandExecutor<Context, RequestContext> executor = new SimpleExecutor(
         finder,
         SuccessParser.wrapping(literal(" "))
     );
@@ -32,7 +34,7 @@ public class DiscoveredCommands {
     String read = reader.nextLine();
     while (!read.equals("exit")) {
       try {
-        executor.execute(read);
+        executor.execute(read, null);
       } catch (CommandNotFoundException e) {
         System.err.println("Command not found");
         System.err.println("Usage: " + e.getResult().getChain().buildUsage().trim());
@@ -43,7 +45,7 @@ public class DiscoveredCommands {
     }
   }
 
-  private static class SimpleExecutor extends CommandExecutor<Context> {
+  private static class SimpleExecutor extends CommandExecutor<Context, RequestContext> {
 
     public SimpleExecutor(CommandFinder<Context> finder,
         SuccessParser commandArgumentSeparator) {
@@ -51,7 +53,8 @@ public class DiscoveredCommands {
     }
 
     @Override
-    protected Context createContext(StringReader input, CommandNode<Context> node) {
+    protected Context createContext(StringReader input, CommandNode<Context> node,
+        RequestContext requestContext) {
       return new Context(input, node);
     }
 
