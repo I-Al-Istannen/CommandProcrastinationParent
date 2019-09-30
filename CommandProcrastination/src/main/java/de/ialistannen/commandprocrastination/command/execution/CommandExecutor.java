@@ -4,7 +4,7 @@ import de.ialistannen.commandprocrastination.command.tree.CommandChain;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder.FindResult;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
@@ -15,7 +15,7 @@ import de.ialistannen.commandprocrastination.util.StringReader;
  *
  * @param <C> the context type
  */
-public abstract class CommandExecutor<C extends Context, R extends RequestContext> {
+public abstract class CommandExecutor<C extends GlobalContext, R extends RequestContext> {
 
   private CommandFinder<C> finder;
   private SuccessParser commandArgumentSeparator;
@@ -74,47 +74,47 @@ public abstract class CommandExecutor<C extends Context, R extends RequestContex
     }
 
     CommandChain<C> commandChain = findResult.getChain();
+    requestContext.setReader(input);
+    requestContext.setFinalNode(commandChain.getFinalNode());
 
     try {
-      executeImpl(input, commandChain.getFinalNode(), requestContext);
+      executeImpl(requestContext);
     } catch (AbnormalCommandResultException e) {
-      handleAbnormalResult(commandChain, e);
+      handleAbnormalResult(commandChain, requestContext, e);
     }
   }
 
   /**
    * Executes the given command using the given context.
    *
-   * @param input the input
-   * @param commandNode the command node
    * @param requestContext the request context
    * @throws ParseException if an error occurs
    * @throws AbnormalCommandResultException if the command throws one
    * @throws CommandNotFoundException if the command was not found
    * @throws CommandException if there was an error executing the command
    */
-  protected void executeImpl(StringReader input, CommandNode<C> commandNode, R requestContext)
-      throws ParseException {
-    commandNode.getCommand().execute(createContext(input, commandNode, requestContext));
+  protected void executeImpl(R requestContext) throws ParseException {
+    CommandNode<C> commandNode = requestContext.getFinalNode();
+    commandNode.getCommand().execute(createContext(requestContext));
   }
 
   /**
    * Handles an abnormal result exception.
    *
    * @param chain the command chain
+   * @param requestContext the request context
    * @param e the exception
    */
-  protected void handleAbnormalResult(CommandChain<C> chain, AbnormalCommandResultException e) {
+  protected void handleAbnormalResult(CommandChain<C> chain, R requestContext,
+      AbnormalCommandResultException e) {
     throw e;
   }
 
   /**
    * Creates a fitting context for an input and node.
    *
-   * @param input the input
-   * @param node the command node
    * @param requestContext the request context
    * @return a fitting context
    */
-  protected abstract C createContext(StringReader input, CommandNode<C> node, R requestContext);
+  protected abstract C createContext(R requestContext);
 }

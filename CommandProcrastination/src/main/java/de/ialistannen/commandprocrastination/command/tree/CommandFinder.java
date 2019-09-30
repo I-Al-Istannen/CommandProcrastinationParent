@@ -3,7 +3,7 @@ package de.ialistannen.commandprocrastination.command.tree;
 import static de.ialistannen.commandprocrastination.parsing.defaults.StringParsers.literal;
 
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.Data;
  *
  * @param <C> the type of the context
  */
-public class CommandFinder<C extends Context> {
+public class CommandFinder<C extends GlobalContext> {
 
   private CommandNode<C> root;
   private SuccessParser argumentSeparator;
@@ -101,7 +101,7 @@ public class CommandFinder<C extends Context> {
    * @param <C> the type of the context
    */
   @Data
-  public static class FindResult<C extends Context> {
+  public static class FindResult<C extends GlobalContext> {
 
     private final CommandChain<C> chain;
     private final boolean success;

@@ -2,7 +2,7 @@ package de.ialistannen.commandprocrastination.command.tree;
 
 import de.ialistannen.commandprocrastination.command.Command;
 import de.ialistannen.commandprocrastination.command.tree.data.CommandDataKey;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,13 +17,14 @@ import java.util.stream.Collectors;
  *
  * @param <C> the type of the context
  */
-public class CommandNode<C extends Context> {
+public class CommandNode<C extends GlobalContext> {
 
   private Command<C> command;
   private SuccessParser headParser;
   private Map<CommandDataKey, Object> userData;
 
   private List<CommandNode<C>> children;
+  private CommandNode<C> parent;
 
   /**
    * Creates a new command node.
@@ -54,6 +55,24 @@ public class CommandNode<C extends Context> {
    */
   protected void setCommand(Command<C> command) {
     this.command = command;
+  }
+
+  /**
+   * Returns the parent node.
+   *
+   * @return the parent npde
+   */
+  public Optional<CommandNode<C>> getParent() {
+    return Optional.ofNullable(parent);
+  }
+
+  /**
+   * Sets the parent node.
+   *
+   * @param parent the parent node
+   */
+  void setParent(CommandNode<C> parent) {
+    this.parent = parent;
   }
 
   /**
@@ -110,6 +129,7 @@ public class CommandNode<C extends Context> {
    */
   public void addChild(CommandNode<C> child) {
     children.add(child);
+    child.setParent(this);
   }
 
   /**
@@ -119,6 +139,17 @@ public class CommandNode<C extends Context> {
    */
   public void removeChild(CommandNode<C> child) {
     children.remove(child);
+    child.setParent(null);
+  }
+
+  public FluentSubCommand<C> addSubCommand() {
+    return new FluentSubCommand<>(this);
+  }
+
+  public CommandNode<C> addSubCommand(FluentSubCommand<C> sub) {
+    sub.setTarget(this);
+    sub.finish();
+    return this;
   }
 
   /**

@@ -1,6 +1,6 @@
 package de.ialistannen.commandprocrastination.command;
 
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 
 /**
@@ -8,7 +8,7 @@ import de.ialistannen.commandprocrastination.parsing.ParseException;
  *
  * @param <C> the context type
  */
-public interface Command<C extends Context> {
+public interface Command<C extends GlobalContext> {
 
   /**
    * Executes the command.
@@ -28,7 +28,7 @@ public interface Command<C extends Context> {
    * @param <C> the context
    * @return the command
    */
-  static <C extends Context> Command<C> nop() {
+  static <C extends GlobalContext> Command<C> nop() {
     return context -> {
 
     };

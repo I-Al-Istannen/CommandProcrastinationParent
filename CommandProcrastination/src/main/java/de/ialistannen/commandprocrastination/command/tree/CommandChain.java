@@ -1,7 +1,7 @@
 package de.ialistannen.commandprocrastination.command.tree;
 
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.ToString;
  *
  * @param <C> the context
  */
-public class CommandChain<C extends Context> {
+public class CommandChain<C extends GlobalContext> {
 
   private ChainLink<CommandNode<C>> start;
   private ChainLink<CommandNode<C>> end;

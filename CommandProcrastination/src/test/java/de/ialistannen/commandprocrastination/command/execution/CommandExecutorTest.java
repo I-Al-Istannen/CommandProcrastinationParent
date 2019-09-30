@@ -9,17 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import de.ialistannen.commandprocrastination.command.Command;
 import de.ialistannen.commandprocrastination.command.tree.CommandFinder;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.context.RequestContext;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
-import de.ialistannen.commandprocrastination.util.StringReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CommandExecutorTest {
 
-  private CommandExecutor<Context, RequestContext> executor;
+  private CommandExecutor<GlobalContext, RequestContext> executor;
 
   private String fooResult;
   private String fooBarResult;
@@ -28,30 +27,30 @@ class CommandExecutorTest {
 
   @BeforeEach
   void setUp() {
-    CommandNode<Context> root = new CommandNode<>(Command.nop(), SuccessParser.alwaysTrue());
+    CommandNode<GlobalContext> root = new CommandNode<>(Command.nop(), SuccessParser.alwaysTrue());
 
-    CommandNode<Context> foo = new CommandNode<>(
+    CommandNode<GlobalContext> foo = new CommandNode<>(
         it -> fooResult = it.shift(greedyPhrase()), SuccessParser.wrapping(literal("foo"))
     );
-    CommandNode<Context> integer = new CommandNode<>(
+    CommandNode<GlobalContext> integer = new CommandNode<>(
         it -> integerResult = it.shift(integer()), SuccessParser.wrapping(integer())
     );
-    CommandNode<Context> fooBar = new CommandNode<>(
+    CommandNode<GlobalContext> fooBar = new CommandNode<>(
         it -> fooBarResult = it.shift(greedyPhrase()), SuccessParser.wrapping(literal("bar"))
     );
-    CommandNode<Context> abnormalExit = new CommandNode<>(
+    CommandNode<GlobalContext> abnormalExit = new CommandNode<>(
         it -> {
           throw new AbnormalCommandResultException("Hello");
         },
         SuccessParser.wrapping(literal("error"))
     );
-    CommandNode<Context> commandException = new CommandNode<>(
+    CommandNode<GlobalContext> commandException = new CommandNode<>(
         it -> {
           throw new CommandException("Test");
         },
         SuccessParser.wrapping(literal("command_exception"))
     );
-    CommandNode<Context> parseException = new CommandNode<>(
+    CommandNode<GlobalContext> parseException = new CommandNode<>(
         it -> it.shift(literal("Hello")),
         SuccessParser.wrapping(literal("parse_exception"))
     );
@@ -64,7 +63,7 @@ class CommandExecutorTest {
 
     foo.addChild(fooBar);
 
-    CommandFinder<Context> finder = new CommandFinder<>(root);
+    CommandFinder<GlobalContext> finder = new CommandFinder<>(root);
     executor = new SimpleExecutor(finder, SuccessParser.wrapping(literal(" ")));
   }
 
@@ -144,16 +143,15 @@ class CommandExecutorTest {
     );
   }
 
-  private static class SimpleExecutor extends CommandExecutor<Context, RequestContext> {
+  private static class SimpleExecutor extends CommandExecutor<GlobalContext, RequestContext> {
 
-    SimpleExecutor(CommandFinder<Context> finder, SuccessParser commandArgumentSeparator) {
+    SimpleExecutor(CommandFinder<GlobalContext> finder, SuccessParser commandArgumentSeparator) {
       super(finder, commandArgumentSeparator);
     }
 
     @Override
-    protected Context createContext(StringReader input, CommandNode<Context> node,
-        RequestContext r) {
-      return new Context(input, node);
+    protected GlobalContext createContext(RequestContext requestContext) {
+      return new GlobalContext(requestContext);
     }
   }
 }

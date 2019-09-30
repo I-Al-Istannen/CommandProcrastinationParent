@@ -2,7 +2,7 @@ package de.ialistannen.commandprocrastination.autodiscovery;
 
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -28,7 +28,7 @@ public class CommandDiscovery {
    * @param <C> the type of the context
    * @return the found commands
    */
-  public <C extends Context> CommandNode<C> findCommands(C initialContext) {
+  public <C extends GlobalContext> CommandNode<C> findCommands(C initialContext) {
     DiscoveryRootCommand<C> root = new DiscoveryRootCommand<>();
     List<GraphNode<CommandNode<C>>> nodes = findAllCommands(initialContext);
 
@@ -46,7 +46,8 @@ public class CommandDiscovery {
     return root;
   }
 
-  private <C extends Context> List<GraphNode<CommandNode<C>>> findAllCommands(C initialContext) {
+  private <C extends GlobalContext> List<GraphNode<CommandNode<C>>> findAllCommands(
+      C initialContext) {
     List<GraphNode<CommandNode<C>>> nodes = new ArrayList<>();
 
     ScanResult classGraph = new ClassGraph()
@@ -84,11 +85,11 @@ public class CommandDiscovery {
     return nodes;
   }
 
-  private <C extends Context> CommandNode<C> instantiate(C initialContext, Class<?> clazz)
+  private <C extends GlobalContext> CommandNode<C> instantiate(C initialContext, Class<?> clazz)
       throws ReflectiveOperationException {
     for (Constructor<?> constructor : clazz.getConstructors()) {
       if (constructor.getParameterCount() == 1) {
-        if (Context.class.isAssignableFrom(constructor.getParameterTypes()[0])) {
+        if (GlobalContext.class.isAssignableFrom(constructor.getParameterTypes()[0])) {
           @SuppressWarnings("unchecked")
           CommandNode<C> temp = (CommandNode<C>) constructor.newInstance(initialContext);
           return temp;

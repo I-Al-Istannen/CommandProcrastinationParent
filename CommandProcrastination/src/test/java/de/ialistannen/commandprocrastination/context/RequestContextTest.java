@@ -9,11 +9,11 @@ import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.util.StringReader;
 import org.junit.jupiter.api.Test;
 
-class ContextTest {
+class RequestContextTest {
 
   @Test
   public void shiftAFew() throws ParseException {
-    Context context = new Context(new StringReader("20 You \"My friend\""), null);
+    RequestContext context = new RequestContext(new StringReader("20 You \"My friend\""), null);
 
     assertEquals(
         20,

@@ -5,7 +5,7 @@ import static de.ialistannen.commandprocrastination.parsing.defaults.StringParse
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.ialistannen.commandprocrastination.command.Command;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import de.ialistannen.commandprocrastination.util.StringReader;
 import java.util.Optional;
@@ -14,14 +14,14 @@ import org.junit.jupiter.api.Test;
 
 class CommandFinderTest {
 
-  private CommandFinder<Context> finder;
-  private CommandNode<Context> foo;
-  private CommandNode<Context> integer;
-  private CommandNode<Context> fooBar;
+  private CommandFinder<GlobalContext> finder;
+  private CommandNode<GlobalContext> foo;
+  private CommandNode<GlobalContext> integer;
+  private CommandNode<GlobalContext> fooBar;
 
   @BeforeEach
   void setUp() {
-    CommandNode<Context> root = new CommandNode<>(Command.nop(), SuccessParser.alwaysTrue());
+    CommandNode<GlobalContext> root = new CommandNode<>(Command.nop(), SuccessParser.alwaysTrue());
 
     foo = new CommandNode<>(
         Command.nop(), SuccessParser.wrapping(literal("foo"))
@@ -70,7 +70,7 @@ class CommandFinderTest {
     assertFinds(fooBar, "foo bar");
   }
 
-  private StringReader assertFinds(CommandNode<Context> node, String input) {
+  private StringReader assertFinds(CommandNode<GlobalContext> node, String input) {
     StringReader reader = new StringReader(input);
     assertEquals(
         Optional.of(node),

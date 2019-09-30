@@ -3,7 +3,7 @@ package de.ialistannen.commandprocrastination.autodiscovery;
 import de.ialistannen.commandprocrastination.command.Command;
 import de.ialistannen.commandprocrastination.command.tree.CommandNode;
 import de.ialistannen.commandprocrastination.command.tree.data.DefaultDataKey;
-import de.ialistannen.commandprocrastination.context.Context;
+import de.ialistannen.commandprocrastination.context.GlobalContext;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Optional;
  *
  * @param <C> the type of the context
  */
-public class DiscoveryRootCommand<C extends Context> extends CommandNode<C> {
+public class DiscoveryRootCommand<C extends GlobalContext> extends CommandNode<C> {
 
   private List<CommandNode<C>> allCommands;
 
