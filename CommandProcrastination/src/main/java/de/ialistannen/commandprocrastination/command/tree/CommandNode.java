@@ -39,6 +39,24 @@ public class CommandNode<C extends Context> {
   }
 
   /**
+   * Creates a new command node with a {@link Command#nop()} command.
+   *
+   * @param headParser the head parser to detect that this node is the correct one
+   */
+  public CommandNode(SuccessParser headParser) {
+    this(Command.nop(), headParser);
+  }
+
+  /**
+   * Sets the used command.
+   *
+   * @param command the command
+   */
+  protected void setCommand(Command<C> command) {
+    this.command = command;
+  }
+
+  /**
    * Sets some data.
    *
    * @param key the key
