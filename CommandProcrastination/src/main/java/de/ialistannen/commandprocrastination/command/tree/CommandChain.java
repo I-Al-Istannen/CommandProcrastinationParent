@@ -74,22 +74,26 @@ public class CommandChain<C extends GlobalContext> {
    */
   public String buildUsage() {
     var currentLink = start;
-    List<String> usageParts = new ArrayList<>();
+    StringBuilder usage = new StringBuilder();
 
     while (currentLink != null) {
       if (currentLink.isEnd()) {
-        usageParts.add(currentLink.getValue().getUsage());
+        usage.append(currentLink.getValue().getUsage());
       } else {
-        var finalLink = currentLink;
-
-        currentLink.getValue().<String>getOptionalData(DefaultDataKey.IDENTIFIER)
-            .or(() -> finalLink.getValue().getHeadParser().getName())
-            .ifPresent(usageParts::add);
+        currentLink.getValue().getHeadParser().getName().ifPresent(usage::append);
+      }
+      if (currentLink.getNext() != null) {
+        boolean requiresNoSeparator = currentLink.getValue()
+            .<Boolean>getOptionalData(DefaultDataKey.NO_ARGUMENT_SEPARATOR)
+            .orElse(false);
+        if (!requiresNoSeparator) {
+          usage.append(" ");
+        }
       }
       currentLink = currentLink.getNext();
     }
 
-    return String.join(" ", usageParts);
+    return usage.toString();
   }
 
   /**
