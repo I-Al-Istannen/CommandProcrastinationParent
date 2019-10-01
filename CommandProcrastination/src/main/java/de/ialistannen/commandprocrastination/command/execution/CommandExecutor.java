@@ -68,9 +68,7 @@ public abstract class CommandExecutor<C extends GlobalContext, R extends Request
     boolean parsedSeparator = commandArgumentSeparator.parse(input);
 
     if (!parsedSeparator && input.canRead()) {
-      throw new CommandException(
-          new ParseException(input, "No separator after command!").getMessage()
-      );
+      throw new NoSeparatorException(input);
     }
 
     CommandChain<C> commandChain = findResult.getChain();
