@@ -86,23 +86,11 @@ public class StringParsers {
   }
 
   /**
-   * A parser that reads the whole left over input. Might be an empty string.
-   *
-   * @return a parser that reads the whole left over input
-   */
-  public static AtomicParser<String> greedyPhrase() {
-    return AtomicParser.named(
-        "Zero or more characters",
-        input -> input.readWhile(it -> true)
-    );
-  }
-
-  /**
    * A parser that reads the whole left over input. Will not match an empty string.
    *
    * @return a parser that reads the whole left over input
    */
-  public static AtomicParser<String> greedyExistingPhrase() {
+  public static AtomicParser<String> greedyPhrase() {
     return AtomicParser.named(
         "One or more characters",
         input -> {
@@ -111,6 +99,18 @@ public class StringParsers {
           }
           return input.readWhile(it -> true);
         }
+    );
+  }
+
+  /**
+   * A parser that reads the whole left over input. Can match an empty string.
+   *
+   * @return a parser that reads the whole left over input
+   */
+  public static AtomicParser<String> greedyOptionalPhrase() {
+    return AtomicParser.named(
+        "Zero or more characters",
+        input -> input.readWhile(it -> true)
     );
   }
 }
