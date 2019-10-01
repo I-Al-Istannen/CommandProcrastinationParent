@@ -47,4 +47,15 @@ public interface AtomicParser<T> {
       }
     };
   }
+
+  /**
+   * Returns a parser that never succeeds and always throws an exception.
+   *
+   * @return a parser that never succeeds
+   */
+  static <T> AtomicParser<T> alwaysFailing() {
+    return input -> {
+      throw new ParseException(input, "I am always false");
+    };
+  }
 }

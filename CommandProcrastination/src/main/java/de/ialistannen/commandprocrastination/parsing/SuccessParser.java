@@ -53,4 +53,15 @@ public class SuccessParser implements AtomicParser<Boolean> {
   public static SuccessParser alwaysTrue() {
     return new SuccessParser(input -> true);
   }
+
+  /**
+   * Returns a parser that never succeeds and always throws an exception.
+   *
+   * @return a parser that never succeeds
+   */
+  public static SuccessParser alwaysFailing() {
+    return new SuccessParser(input -> {
+      throw new ParseException(input, "I am always false");
+    });
+  }
 }
