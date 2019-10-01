@@ -8,9 +8,11 @@ import de.ialistannen.commandprocrastination.util.StringReader;
 public class ParseException extends Exception {
 
   private static final int CONTEXT_LENGTH = 10;
+  private final String detail;
 
   public ParseException(StringReader reader, String detail) {
     super(getContext(reader, detail));
+    this.detail = detail;
   }
 
   public ParseException(StringReader reader) {
@@ -23,6 +25,16 @@ public class ParseException extends Exception {
 
   public ParseException(StringReader reader, String detail, Throwable underlying) {
     super(getContext(reader, detail), underlying);
+    this.detail = detail;
+  }
+
+  /**
+   * Returns the detail message without any context.
+   *
+   * @return the message without aby context
+   */
+  public String getDetail() {
+    return detail;
   }
 
   private static String getContext(StringReader input, String detail) {
