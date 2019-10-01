@@ -86,7 +86,7 @@ public class StringParsers {
   }
 
   /**
-   * A parser that reads the whole left over input.
+   * A parser that reads the whole left over input. Might be an empty string.
    *
    * @return a parser that reads the whole left over input
    */
@@ -94,6 +94,23 @@ public class StringParsers {
     return AtomicParser.named(
         "Zero or more characters",
         input -> input.readWhile(it -> true)
+    );
+  }
+
+  /**
+   * A parser that reads the whole left over input. Will not match an empty string.
+   *
+   * @return a parser that reads the whole left over input
+   */
+  public static AtomicParser<String> greedyExistingPhrase() {
+    return AtomicParser.named(
+        "One or more characters",
+        input -> {
+          if (!input.canRead()) {
+            throw new ParseException(input, "Expected one or more characters");
+          }
+          return input.readWhile(it -> true);
+        }
     );
   }
 }
