@@ -81,6 +81,101 @@ String name = context.shift(phrase()); // phrase is from StringParsers and parse
 int age = conext.shift(intWithinRage(1, 130)); // from IntegerParsers. Throws an exception exiting the command if the integer is out of bounds or invalid
 ```
 
+## Creating your own context
+Just subclass `GlobalContext` and `RequestContext` when needed and add the fields you want to them. For example:
+```java
+public class CommandContext extends GlobalContext {
+
+  private Toml config;
+  private Database database;
+
+  /**
+   * Creates a new command context.
+   *
+   * @param config the config
+   * @param database the database
+   */
+  public CommandContext(JdaRequestContext requestContext, Toml config, Database database) {
+    super(requestContext);
+    this.config = config;
+    this.database = database;
+  }
+
+  // Overriden to specialize the return type to a JdaRequestContext
+  @Override
+  public JdaRequestContext getRequestContext() {
+    return requestContext;
+  }
+
+  public Toml getConfig() {
+    return config;
+  }
+
+  public Database getDatabase() {
+    return database;
+  }
+
+  /**
+   * The context for a single request.
+   */
+  public static class JdaRequestContext extends RequestContext {
+
+    private Message message;
+    private User user;
+    private Guild guild;
+    private MessageChannel channel;
+
+    JdaRequestContext(Message message, User user, Guild guild) {
+      this.message = message;
+      this.user = user;
+      this.guild = guild;
+      this.channel = message.getChannel();
+    }
+
+    public Message getMessage() {
+      return message;
+    }
+
+    public MessageChannel getChannel() {
+      return channel;
+    }
+
+    public User getUser() {
+      return user;
+    }
+
+    public Guild getGuild() {
+      return guild;
+    }
+  }
+
+}
+```
+
+## Creating your own `CommandExecutor`
+Just subclass `CommandExecutor`. For example:
+```java
+class JdaExecutor extends CommandExecutor<CommandContext, JdaRequestContext> {
+
+  private final Toml config;
+  private final Database database;
+
+  JdaExecutor(CommandFinder<CommandContext> finder, Toml config, Database database) {
+    // the argument separator is a space
+    super(finder, SuccessParser.wrapping(literal(" ")));
+    this.config = config;
+    this.database = database;
+  }
+
+  @Override
+  protected CommandContext createContext(JdaRequestContext requestContext) {
+    return new CommandContext(requestContext, config, database);
+  }
+}
+```
+
+# Examples
+
 ## Slightly more involved command creating tags
 ```java
 @ActiveCommand(name = "tag-create", parentClass = TagCommand.class)
