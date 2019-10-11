@@ -26,6 +26,26 @@ This is yet another command library that is independent from the actual underlyi
 * Command nodes can be annotated with custom data and a few keys for permissions, usage and so on are provided.
   These can be read and used by anything with access to the command nodes but are especially nice for help commands or permission checks.
 
+# Getting started
+1. Create your own contexts and CommandExecutor.
+2. Add all your commands. Maybe with 
+    ```java
+    CommandNode<CommandContext> rootCommand = new CommandDiscovery().findCommands(
+        createBaseContext()
+    );
+    commandFinder = new CommandFinder<>(rootCommand);
+    ```
+3. Create a command executor using that comma finder.
+4. Create a request context in your command listener and start executing commands:
+    ```java
+    JdaRequestContext context = new JdaRequestContext(
+        event.getMessage(),
+        event.getAuthor(),
+        event.getGuild()
+    );
+    executor.execute(content, context);
+    ```
+
 # Architecture overview
 
 ## Classes
@@ -270,6 +290,78 @@ public class PingCommand extends CommandNode<CommandContext> {
         new SimpleMessage(category, "Pong!"),
         context.getRequestContext().getChannel()
     );
+  }
+}
+```
+
+
+## A help command for discord
+This command also fetches usages and descriptions from a messages config.
+```java
+@ActiveCommand(name = "help", parentClass = PrefixedBaseCommand.class)
+public class HelpCommand extends CommandNode<CommandContext> {
+
+  public HelpCommand() {
+    super(SuccessParser.wrapping(literal("help")));
+    setCommand(this::execute);
+  }
+
+  private void execute(CommandContext context) throws ParseException {
+    String path = context.shift(greedyPhrase());
+
+    FindResult<CommandContext> foundCommands = context.getCommandFinder()
+        // Remove the need to specify the prefix
+        .find(getParent().orElseThrow(), new StringReader(path));
+
+    CommandNode<CommandContext> finalNode = foundCommands.getChain().getFinalNode();
+
+    ComplexMessage message = new ComplexMessage(MessageCategory.INFORMATION);
+
+    finalNode.getOptionalData(DefaultDataKey.IDENTIFIER).ifPresent(name ->
+        message.editEmbed(it -> it.setTitle(name.toString()))
+    );
+
+    finalNode.getHeadParser().getName().ifPresent(name ->
+        message.editEmbed(it -> it.addField("Keyword", '`' + name + '`', true))
+    );
+
+    finalNode.getOptionalData(DefaultDataKey.USAGE)
+        .map(usage -> "`" + usage + "`")
+        .or(() -> fetchFromMessages("usage", context, finalNode))
+        .or(() -> Optional.of("*(approx)* `" + foundCommands.getChain().buildUsage() + "`"))
+        .ifPresent(usage ->
+            message.editEmbed(it -> it.addField("Usage", usage, true))
+        );
+
+    finalNode.getOptionalData(DefaultDataKey.SHORT_DESCRIPTION)
+        .or(() -> fetchFromMessages("short-description", context, finalNode))
+        .ifPresent(desc ->
+            message.editEmbed(it -> it.addField("Short description", desc.toString(), true))
+        );
+    finalNode.getOptionalData(DefaultDataKey.LONG_DESCRIPTION)
+        .or(() -> fetchFromMessages("long-description", context, finalNode))
+        .ifPresent(desc ->
+            message.editEmbed(it -> it.setDescription(desc.toString()))
+        );
+
+    finalNode.getOptionalData(DefaultDataKey.PERMISSION).ifPresent(perm ->
+        message.editEmbed(it -> it.addField("Permission", "`" + perm + "`", true))
+    );
+
+    context.getMessageSender().sendMessage(
+        message, context.getRequestContext().getChannel()
+    );
+  }
+
+  private Optional<String> fetchFromMessages(String restPath, CommandContext commandContext,
+      CommandNode<CommandContext> node) {
+    if (!node.hasOptionalData(DefaultDataKey.IDENTIFIER)) {
+      return Optional.empty();
+    }
+    String identifier = node.<String>getOptionalData(DefaultDataKey.IDENTIFIER).orElseThrow();
+    String lookupPath = "commands." + identifier + "." + restPath;
+
+    return commandContext.getMessages().trOptional(lookupPath);
   }
 }
 ```
