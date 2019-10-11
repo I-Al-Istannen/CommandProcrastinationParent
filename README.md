@@ -2,6 +2,28 @@
 
 This is yet another command library that is independent from the actual underlying program (Discord, IRC, Minecraft, ...).
 
+# TOC
+- [About](#about)
+  * [Features](#features)
+- [Getting started](#getting-started)
+- [Architecture overview](#architecture-overview)
+  * [Classes](#classes)
+    + [The `AtomicParser`](#the--atomicparser-)
+    + [The `SuccessParser`](#the--successparser-)
+    + [The `Command`](#the--command-)
+    + [The `CommandNode`](#the--commandnode-)
+    + [The `CommandFinder`](#the--commandfinder-)
+    + [The `CommandExecutor`](#the--commandexecutor-)
+    + [The `GlobalContext` and the `RequestContext`](#the--globalcontext--and-the--requestcontext-)
+    + [The `CommandDiscovery`](#the--commanddiscovery-)
+  * [Argument fetching workflow](#argument-fetching-workflow)
+  * [Creating your own context](#creating-your-own-context)
+  * [Creating your own `CommandExecutor`](#creating-your-own--commandexecutor-)
+- [Examples](#examples)
+  * [Slightly more involved command creating tags](#slightly-more-involved-command-creating-tags)
+  * [Command with mixed discovery and manual adding](#command-with-mixed-discovery-and-manual-adding)
+  * [A help command for discord](#a-help-command-for-discord)
+
 ## Features
 
 * Annotation driven autodiscovery or java based half-fluent API
