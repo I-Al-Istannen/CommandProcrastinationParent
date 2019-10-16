@@ -1,8 +1,11 @@
 package de.ialistannen.commandprocrastination.command.tree;
 
+import static de.ialistannen.commandprocrastination.parsing.defaults.StringParsers.literal;
+
 import de.ialistannen.commandprocrastination.command.Command;
 import de.ialistannen.commandprocrastination.command.tree.data.CommandDataKey;
 import de.ialistannen.commandprocrastination.context.GlobalContext;
+import de.ialistannen.commandprocrastination.parsing.AtomicParser;
 import de.ialistannen.commandprocrastination.parsing.SuccessParser;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +40,30 @@ public class CommandNode<C extends GlobalContext> {
     this.headParser = headParser;
     this.userData = new HashMap<>();
     this.children = new ArrayList<>();
+  }
+
+  /**
+   * Creates a new command node.
+   *
+   * @param command the command of this node
+   * @param headParser the head parser to detect that this node is the correct one. It will be
+   *     wrapped in a {@link SuccessParser}.
+   * @see CommandNode#CommandNode(Command, SuccessParser)
+   */
+  public CommandNode(Command<C> command, AtomicParser<?> headParser) {
+    this(command, SuccessParser.wrapping(headParser));
+  }
+
+  /**
+   * Creates a new command node.
+   *
+   * @param command the command of this node
+   * @param literalKeyword the literal keyword. It will be wrapped in a {@link
+   *     de.ialistannen.commandprocrastination.parsing.defaults.StringParsers#literal literal}
+   * @see CommandNode#CommandNode(Command, AtomicParser)
+   */
+  public CommandNode(Command<C> command, String literalKeyword) {
+    this(command, literal(literalKeyword));
   }
 
   /**
