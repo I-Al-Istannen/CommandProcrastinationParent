@@ -76,6 +76,27 @@ public class CommandNode<C extends GlobalContext> {
   }
 
   /**
+   * Creates a new command node with a {@link Command#nop()} command.
+   *
+   * @param headParser the head parser to detect that this node is the correct one
+   * @see CommandNode#CommandNode(SuccessParser)
+   */
+  public CommandNode(AtomicParser<?> headParser) {
+    this(SuccessParser.wrapping(headParser));
+  }
+
+  /**
+   * Creates a new command node with a {@link Command#nop()} command.
+   *
+   * @param literalKeyword the literal keyword. It will be wrapped in a {@link
+   *     de.ialistannen.commandprocrastination.parsing.defaults.StringParsers#literal literal}
+   * @see CommandNode#CommandNode(AtomicParser)
+   */
+  public CommandNode(String literalKeyword) {
+    this(literal(literalKeyword));
+  }
+
+  /**
    * Sets the used command.
    *
    * @param command the command
