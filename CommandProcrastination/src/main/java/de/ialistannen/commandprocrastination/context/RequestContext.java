@@ -97,7 +97,12 @@ public class RequestContext {
     ParseException exception = null;
     for (AtomicParser<T> atomicParser : parser) {
       try {
-        return atomicParser.parse(reader);
+        T result = atomicParser.parse(reader);
+
+        // read trailing whitespace
+        reader.readWhile(Character::isWhitespace);
+
+        return result;
       } catch (ParseException e) {
         exception = e;
       }
