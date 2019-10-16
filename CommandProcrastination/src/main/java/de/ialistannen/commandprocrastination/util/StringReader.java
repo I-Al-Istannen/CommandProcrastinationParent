@@ -126,6 +126,11 @@ public class StringReader {
       return "";
     }
 
+    if (matcher.start() != position) {
+      // The match must start at the current position or it does not count
+      return "";
+    }
+
     int start = position;
     position = matcher.end();
 
