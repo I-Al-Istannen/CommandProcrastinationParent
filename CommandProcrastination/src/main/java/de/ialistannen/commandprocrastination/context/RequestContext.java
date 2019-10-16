@@ -5,6 +5,7 @@ import de.ialistannen.commandprocrastination.parsing.AtomicParser;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import de.ialistannen.commandprocrastination.util.StringReader;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Some context that is only valid for a single request. E.g. metadata or specific objects like
@@ -63,9 +64,27 @@ public class RequestContext {
   }
 
   /**
-   * Uses the given parser to extract an argument.
+   * Uses the given parser to extract an argument. Also reads all trailing whitespace, after the
+   * parser is done.
    *
    * @param parser the parser to use
+   * @param <T> the type of the resulting argument
+   * @return the parsed argument or an empty optional if an error occurred
+   * @see #shift(AtomicParser)
+   */
+  public <T> Optional<T> shiftOptionally(AtomicParser<T> parser) {
+    try {
+      return Optional.ofNullable(shift(parser));
+    } catch (ParseException e) {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Uses the given parsers to extract an argument. All parsers are tried one after the other, in
+   * order. Also reads all trailing whitespace, after the parser is done.
+   *
+   * @param parser the parsers to use
    * @param <T> the type of the resulting argument
    * @return the parsed argument
    * @throws ParseException if an error occurred. The last exception will be rethrown

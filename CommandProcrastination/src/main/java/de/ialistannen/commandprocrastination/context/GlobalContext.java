@@ -3,6 +3,7 @@ package de.ialistannen.commandprocrastination.context;
 import de.ialistannen.commandprocrastination.parsing.AtomicParser;
 import de.ialistannen.commandprocrastination.parsing.ParseException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The context for command parsing.
@@ -38,9 +39,23 @@ public class GlobalContext {
   }
 
   /**
-   * Uses the given parser to extract an argument.
+   * Uses the given parser to extract an argument. Also reads all trailing whitespace, after the
+   * parser is done.
    *
    * @param parser the parser to use
+   * @param <T> the type of the resulting argument
+   * @return the parsed argument or an empty optional if an error occurred
+   * @see #shift(AtomicParser)
+   */
+  public <T> Optional<T> shiftOptionally(AtomicParser<T> parser) {
+    return getRequestContext().shiftOptionally(parser);
+  }
+
+  /**
+   * Uses the given parsers to extract an argument. All parsers are tried one after the other, in
+   * order. Also reads all trailing whitespace, after the parser is done.
+   *
+   * @param parser the parsers to use
    * @param <T> the type of the resulting argument
    * @return the parsed argument
    * @throws ParseException if an error occurred. The last exception will be rethrown
