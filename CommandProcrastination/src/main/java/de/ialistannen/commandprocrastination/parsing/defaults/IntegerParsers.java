@@ -16,6 +16,9 @@ public class IntegerParsers {
 
     return input -> {
       String read = input.readRegex(pattern);
+      if (read.isEmpty()) {
+        throw new ParseException(input, "I expected an integer, but I got nothing!");
+      }
       try {
         return Integer.parseInt(read.replace("_", ""));
       } catch (NumberFormatException e) {

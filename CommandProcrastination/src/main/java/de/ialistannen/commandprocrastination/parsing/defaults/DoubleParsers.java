@@ -19,6 +19,9 @@ public class DoubleParsers {
 
     return input -> {
       String read = input.readRegex(pattern);
+      if (read.isEmpty()) {
+        throw new ParseException(input, "I expected a double, but I got nothing!");
+      }
       try {
         return Double.parseDouble(read.replace("_", ""));
       } catch (NumberFormatException e) {
