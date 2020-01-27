@@ -6,7 +6,6 @@ import de.ialistannen.commandprocrastination.context.GlobalContext;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +23,13 @@ public class CommandDiscovery {
   /**
    * Finds all commands, instantiates them, tries to order them and returns the root.
    *
-   * @param initialContext the initial context to pass to discovered commands
+   * @param instantiator the instance creator for command node classes
    * @param <C> the type of the context
    * @return the found commands
    */
-  public <C extends GlobalContext> CommandNode<C> findCommands(C initialContext) {
+  public <C extends GlobalContext> CommandNode<C> findCommands(Instantiator<C> instantiator) {
     DiscoveryRootCommand<C> root = new DiscoveryRootCommand<>();
-    List<GraphNode<CommandNode<C>>> nodes = findAllCommands(initialContext);
+    List<GraphNode<CommandNode<C>>> nodes = findAllCommands(instantiator);
 
     // Connect the graph
     for (GraphNode<CommandNode<C>> node : nodes) {
@@ -47,7 +46,7 @@ public class CommandDiscovery {
   }
 
   private <C extends GlobalContext> List<GraphNode<CommandNode<C>>> findAllCommands(
-      C initialContext) {
+      Instantiator<C> instantiator) {
     List<GraphNode<CommandNode<C>>> nodes = new ArrayList<>();
 
     ScanResult classGraph = new ClassGraph()
@@ -65,12 +64,15 @@ public class CommandDiscovery {
       }
       ActiveCommand activeCommand = aClass.getAnnotation(ActiveCommand.class);
 
-      CommandNode<C> node;
-      try {
-        node = instantiate(initialContext, aClass);
-      } catch (ReflectiveOperationException e) {
-        throw new RuntimeException(e);
+      if (!CommandNode.class.isAssignableFrom(aClass)) {
+        throw new IllegalArgumentException("Found @ActiveCommand on non-command class: " + aClass);
       }
+
+      @SuppressWarnings("unchecked")
+      Class<CommandNode<C>> commandNodeClass = (Class<CommandNode<C>>) aClass;
+
+      CommandNode<C> node;
+      node = instantiator.newInstance(commandNodeClass);
 
       String parent = activeCommand.parent().equals("no-parent") ? null : activeCommand.parent();
       String name = activeCommand.name();
@@ -83,22 +85,6 @@ public class CommandDiscovery {
     }
 
     return nodes;
-  }
-
-  private <C extends GlobalContext> CommandNode<C> instantiate(C initialContext, Class<?> clazz)
-      throws ReflectiveOperationException {
-    for (Constructor<?> constructor : clazz.getConstructors()) {
-      if (constructor.getParameterCount() == 1) {
-        if (GlobalContext.class.isAssignableFrom(constructor.getParameterTypes()[0])) {
-          @SuppressWarnings("unchecked")
-          CommandNode<C> temp = (CommandNode<C>) constructor.newInstance(initialContext);
-          return temp;
-        }
-      }
-    }
-    @SuppressWarnings("unchecked")
-    CommandNode<C> temp = (CommandNode<C>) clazz.getConstructor().newInstance();
-    return temp;
   }
 
   private <E> Optional<GraphNode<E>> findNode(NodeRelation relation, List<GraphNode<E>> nodes) {
